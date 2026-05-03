@@ -173,6 +173,112 @@
       margin-top: 14px;
     }
 
+
+    .clueBtn {
+      position: fixed;
+      z-index: 4;
+      width: clamp(56px, 7vw, 108px);
+      height: clamp(56px, 7vw, 108px);
+      border-radius: 50%;
+      border: 4px solid rgba(255, 217, 106, 0.92);
+      background: rgba(0, 0, 0, 0.32);
+      box-shadow: 0 0 0 2px rgba(255, 217, 106, 0.18), 0 10px 28px rgba(0,0,0,0.38);
+      padding: 6px;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+      touch-action: manipulation;
+    }
+
+    .clueBtn:hover,
+    .clueBtn:focus-visible {
+      transform: scale(1.08);
+      border-color: var(--yellowBright);
+      box-shadow: 0 0 0 3px rgba(255, 220, 110, 0.24), 0 14px 32px rgba(0,0,0,0.44);
+      outline: none;
+    }
+
+    .clueBtn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .clueTopLeft { top: clamp(12px, 2vw, 28px); left: clamp(12px, 2vw, 28px); }
+    .clueTopRight { top: clamp(12px, 2vw, 28px); right: clamp(12px, 2vw, 28px); }
+    .clueBottomLeft { bottom: clamp(12px, 2vw, 28px); left: clamp(12px, 2vw, 28px); }
+    .clueBottomRight { bottom: clamp(12px, 2vw, 28px); right: clamp(12px, 2vw, 28px); }
+
+    .clueOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .clueCard {
+      width: min(760px, 92vw);
+      min-height: 180px;
+      border-radius: 28px;
+      border: 3px solid rgba(255, 217, 106, 0.88);
+      background: rgba(0, 0, 0, 0.82);
+      box-shadow: 0 22px 70px rgba(0,0,0,0.55), 0 0 36px rgba(255, 217, 106, 0.16);
+      padding: clamp(24px, 4vw, 42px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      text-align: center;
+      animation: cluePop 0.22s ease;
+    }
+
+    .clueText {
+      margin: 0;
+      font-size: clamp(24px, 3.2vw, 44px);
+      line-height: 1.18;
+      font-weight: 800;
+      color: #fff7d6;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.75);
+    }
+
+    .clueClose {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 3px solid var(--yellow);
+      background: rgba(255,255,255,0.08);
+      color: #fff7d6;
+      font-size: clamp(16px, 1.8vw, 22px);
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 10px 26px;
+      cursor: pointer;
+    }
+
+    .clueClose:hover,
+    .clueClose:focus-visible {
+      border-color: var(--yellowBright);
+      background: rgba(255,255,255,0.16);
+      outline: none;
+    }
+
+    @keyframes cluePop {
+      0% { transform: scale(0.88); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     .hidden {
       display: none !important;
     }
@@ -288,6 +394,27 @@
   </video>
   <div class="bgDim"></div>
 
+
+  <button class="clueBtn clueTopLeft" type="button" data-clue="0" aria-label="Show clue 1">
+    <img src="clue1.png" alt="Clue 1" />
+  </button>
+  <button class="clueBtn clueTopRight" type="button" data-clue="1" aria-label="Show clue 2">
+    <img src="clue2.png" alt="Clue 2" />
+  </button>
+  <button class="clueBtn clueBottomLeft" type="button" data-clue="2" aria-label="Show clue 3">
+    <img src="clue3.png" alt="Clue 3" />
+  </button>
+  <button class="clueBtn clueBottomRight" type="button" data-clue="3" aria-label="Show clue 4">
+    <img src="clue4.png" alt="Clue 4" />
+  </button>
+
+  <div class="clueOverlay hidden" id="clueOverlay" aria-hidden="true">
+    <div class="clueCard" role="dialog" aria-modal="true" aria-labelledby="clueText">
+      <p class="clueText" id="clueText"></p>
+      <button class="clueClose" type="button" id="clueClose">Close</button>
+    </div>
+  </div>
+
   <main class="app">
     <section class="panel" aria-label="Code entry panel">
       <div class="rows">
@@ -304,11 +431,18 @@
     </div>
   </div>
 
-  <audio id="winSound" preload="auto" src="sounds/win.wav"></audio>
-  <audio id="loseSound" preload="auto" src="sounds/lose.wav"></audio>
+  <audio id="winSound" preload="auto" src="sounds/win.mp3"></audio>
+  <audio id="loseSound" preload="auto" src="sounds/lose.mp3"></audio>
 
   <script>
     const SECRET_CODE = [4, 10, 9, 8, 7, 6, 12, 5, 11, 3, 2, 1];
+
+    const CLUES = [
+      "You must bring completed codes to your host to progress.",
+      "Every code goes up, with 9 being the top.",
+      "Put the icons in order of birth, youngest to oldest.",
+      "The codes must be numbers, not symbols or icons."
+    ];
 
     const SETTINGS = {
       totalIcons: 12,
@@ -332,6 +466,9 @@
     const winSound = document.getElementById('winSound');
     const loseSound = document.getElementById('loseSound');
     const panel = document.querySelector('.panel');
+    const clueOverlay = document.getElementById('clueOverlay');
+    const clueText = document.getElementById('clueText');
+    const clueClose = document.getElementById('clueClose');
 
     function preloadClickSounds() {
       state.clickSounds = [];
@@ -493,10 +630,47 @@
       }
     }
 
+
+    function showClue(index) {
+      clueText.textContent = CLUES[index] || '';
+      clueOverlay.classList.remove('hidden');
+      clueOverlay.setAttribute('aria-hidden', 'false');
+      clueClose.focus();
+    }
+
+    function hideClue() {
+      clueOverlay.classList.add('hidden');
+      clueOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function setupClues() {
+      document.querySelectorAll('.clueBtn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const index = Number(btn.dataset.clue);
+          showClue(index);
+        });
+      });
+
+      clueClose.addEventListener('click', hideClue);
+
+      clueOverlay.addEventListener('click', (event) => {
+        if (event.target === clueOverlay) {
+          hideClue();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !clueOverlay.classList.contains('hidden')) {
+          hideClue();
+        }
+      });
+    }
+
     function init() {
       if (SECRET_CODE.length !== SETTINGS.sequenceLength) {
         console.error('SECRET_CODE length must match SETTINGS.sequenceLength');
       }
+      setupClues();
       preloadClickSounds();
       buildAttemptSlots();
       buildPickerButtons();
